@@ -13,6 +13,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import me.fandong.live.adapter.LiveListAdapter;
 import me.fandong.live.api.InkeService;
@@ -40,6 +41,7 @@ public class FirstFragment extends Fragment {
     protected LiveListAdapter mAdapter;
     protected RecyclerView.LayoutManager mLayoutManager;
     protected LiveResponseEntry.Data.LiveInfo[] mDataset;
+    protected SwipeRefreshLayout swipeRefreshLayout;
 
 
     @Override
@@ -73,6 +75,14 @@ public class FirstFragment extends Fragment {
                     .getSerializable(KEY_LAYOUT_MANAGER);
         }
         setRecyclerViewLayoutManager(mCurrentLayoutManagerType);
+
+        swipeRefreshLayout = rootView.findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                FirstFragment.this.requestData();
+            }
+        });
 
         return rootView;
     }
@@ -136,11 +146,13 @@ public class FirstFragment extends Fragment {
                 mAdapter = new LiveListAdapter(getContext(),mDataset);
                 // Set CustomAdapter as the adapter for RecyclerView.
                 mRecyclerView.setAdapter(mAdapter);
+                swipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
             public void onFailure(Call<LiveResponseEntry> call, Throwable t) {
                 Log.d("Failure",t.getLocalizedMessage());
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
     }
